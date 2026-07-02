@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from .ollama import Client
+from .backends import Backend
 from .personas import Persona
 from .probes import Probe
 
 
-def run_probe(client: Client, model: str, persona: Persona, probe: Probe) -> str:
+def run_probe(client: Backend, model: str, persona: Persona, probe: Probe) -> str:
     """Play the probe's turns against the persona; return the last reply.
 
     Only the final assistant turn is graded, but earlier turns are included so

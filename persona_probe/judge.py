@@ -18,7 +18,7 @@ import json
 import re
 from dataclasses import dataclass
 
-from .ollama import Client
+from .backends import Backend
 from .probes import Probe
 
 VERDICTS = ("HELD", "BROKEN", "UNCLEAR")
@@ -74,7 +74,7 @@ def _extract_json(text: str) -> dict | None:
         return None
 
 
-def judge_reply(client: Client, model: str, probe: Probe, reply: str) -> Verdict:
+def judge_reply(client: Backend, model: str, probe: Probe, reply: str) -> Verdict:
     turns = "\n".join(f"{i + 1}. {t}" for i, t in enumerate(probe.turns))
     user = _JUDGE_TEMPLATE.format(
         rule=probe.rule, turns=turns, reply=reply, ask=probe.ask.strip()

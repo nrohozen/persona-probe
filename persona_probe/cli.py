@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
+from .backends import BackendError, make_backend
 from .judge import judge_reply
-from .ollama import Client, OllamaError
 from .personas import load_personas
 from .probes import load_probes
 from .report import Result, console_report, has_failures, markdown_report
@@ -42,7 +43,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--responder", default="qwen2.5:7b", help="model that plays the persona")
     p.add_argument("--judge", default="llama3.1:8b", help="model that grades (different family)")
-    p.add_argument("--host", default="http://localhost:11434", help="Ollama host")
+    p.add_argument(
+        "--backend",
+        choices=["ollama", "openai"],
+        default="ollama",
+        help="ollama (native) or openai (LM Studio, llama.cpp, vLLM, hosted APIs)",
+    )
+    p.add_argument(
+        "--host",
+        default=None,
+        help="server base URL (default: Ollama :11434, or OpenAI-compatible :1234/v1)",
+    )
+    p.add_argument(
+        "--api-key",
+        default=None,
+        help="API key for the openai backend (or set OPENAI_API_KEY)",
+    )
     p.add_argument("--only", action="append", help="restrict to persona slug(s); repeatable")
     p.add_argument("-o", "--output", type=Path, help="write a Markdown report here")
     p.add_argument("-v", "--verbose", action="store_true", help="print rules and replies")
@@ -81,7 +97,11 @@ def main(argv: list[str] | None = None) -> int:
             print(f"error: no probes match --only {sorted(wanted)}", file=sys.stderr)
             return 2
 
-    client = Client(host=args.host)
+    client = make_backend(
+        args.backend,
+        host=args.host,
+        api_key=args.api_key or os.environ.get("OPENAI_API_KEY"),
+    )
     results: list[Result] = []
 
     for probe in probes:
@@ -97,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             reply = run_probe(client, args.responder, persona, probe)
             verdict = judge_reply(client, args.judge, probe, reply)
-        except OllamaError as e:
+        except BackendError as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
         results.append(Result(probe.persona, probe.id, probe.rule, reply, verdict))

@@ -40,10 +40,12 @@ rounding error — a judge that isn't sure should say so rather than flip a coin
 
 - It does not score persona "quality." Quality is taste; rule-adherence is
   testable. It only checks the second.
-- It does not call a hosted API. Everything runs against local
-  [Ollama](https://ollama.com), with deterministic params (`temperature: 0`, a
-  fixed seed) so a run is reproducible and a regression is real, not sampling
-  noise. Same discipline as [`model-bench`](https://github.com/nrohozen).
+- It does not assume a paid, remote model. It defaults to local
+  [Ollama](https://ollama.com), and it talks to any OpenAI-compatible server —
+  LM Studio, llama.cpp, vLLM, or a hosted API — through `--backend openai`.
+  Either way it pins deterministic params (`temperature: 0`, a fixed seed) so a
+  run is reproducible and a regression is real, not sampling noise. Same
+  discipline as [`model-bench`](https://github.com/nrohozen).
 - It does not hardcode anything about you. It ships with a set of sample
   personas so it runs out of the box, but you can point it at any directory of
   persona files and any pair of models.
@@ -104,6 +106,32 @@ persona-probe --personas path/to/_personas --responder mistral:7b --judge gemma2
 Exit code is non-zero if any probe comes back `BROKEN`, so you can wire it into
 CI or a pre-commit hook and treat a persona regression like a failing build.
 
+## Backends
+
+The default backend is Ollama. Pass `--backend openai` to use any
+OpenAI-compatible server instead — the responder and judge still have to be
+different families, that rule doesn't change.
+
+| Runner                | Flags                                                             |
+|-----------------------|-------------------------------------------------------------------|
+| Ollama (default)      | *(nothing)*                                                       |
+| LM Studio             | `--backend openai` *(default host `localhost:1234/v1`)*           |
+| llama.cpp (`llama-server`) | `--backend openai --host http://localhost:8080/v1`          |
+| vLLM / other local    | `--backend openai --host http://HOST:PORT/v1`                     |
+| Hosted API (OpenAI, OpenRouter, …) | `--backend openai --host https://api.openai.com/v1 --api-key ...` |
+
+```bash
+# grade with two models served by LM Studio
+persona-probe --backend openai \
+    --responder qwen2.5-7b-instruct --judge llama-3.1-8b-instruct
+
+# hosted via OpenRouter; the key can come from --api-key or OPENAI_API_KEY.
+# Responder and judge are still different families on purpose.
+export OPENAI_API_KEY=sk-or-...
+persona-probe --backend openai --host https://openrouter.ai/api/v1 \
+    --responder openai/gpt-4o-mini --judge meta-llama/llama-3.1-8b-instruct
+```
+
 ## How a probe is written
 
 A probe is a YAML file named after the persona it targets. Each entry pins one
@@ -134,7 +162,7 @@ what the author intended.
 persona_probe/
   personas.py   parse Jekyll persona files (frontmatter + system-prompt body)
   probes.py     load + validate probe YAML
-  ollama.py     thin, dependency-light Ollama chat client (stdlib urllib)
+  backends.py   Ollama + OpenAI-compatible chat clients (stdlib urllib)
   runner.py     drive the conversation as the persona, capture the reply
   judge.py      grade one reply against one rule with the OTHER model
   report.py     console + Markdown rendering
