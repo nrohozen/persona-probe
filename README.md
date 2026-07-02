@@ -44,8 +44,7 @@ rounding error — a judge that isn't sure should say so rather than flip a coin
   [Ollama](https://ollama.com), and it talks to any OpenAI-compatible server —
   LM Studio, llama.cpp, vLLM, or a hosted API — through `--backend openai`.
   Either way it pins deterministic params (`temperature: 0`, a fixed seed) so a
-  run is reproducible and a regression is real, not sampling noise. Same
-  discipline as [`model-bench`](https://github.com/nrohozen).
+  run is reproducible and a regression is real, not sampling noise.
 - It does not hardcode anything about you. It ships with a set of sample
   personas so it runs out of the box, but you can point it at any directory of
   persona files and any pair of models.
