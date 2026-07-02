@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "persona-probe"
+version = "0.1.0"
+description = "pytest for persona system prompts: behavioral regression tests graded by an independent local model."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "nrohozen" }]
+keywords = ["llm", "personas", "system-prompt", "evals", "ollama", "regression-testing"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = ["PyYAML>=6.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://github.com/nrohozen/persona-probe"
+Personas = "https://nrohozen.github.io/personas/"
+
+[project.scripts]
+persona-probe = "persona_probe.cli:main"
+
+[tool.setuptools]
+packages = ["persona_probe"]

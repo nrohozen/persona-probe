@@ -44,40 +44,62 @@ rounding error — a judge that isn't sure should say so rather than flip a coin
   [Ollama](https://ollama.com), with deterministic params (`temperature: 0`, a
   fixed seed) so a run is reproducible and a regression is real, not sampling
   noise. Same discipline as [`model-bench`](https://github.com/nrohozen).
-- It does not hardcode anything about you. Point it at any directory of persona
-  files and any pair of models.
+- It does not hardcode anything about you. It ships with a set of sample
+  personas so it runs out of the box, but you can point it at any directory of
+  persona files and any pair of models.
 
 ## Install
 
-```powershell
+You need Python 3.10+ and a running [Ollama](https://ollama.com).
+
+```bash
+git clone https://github.com/nrohozen/persona-probe
 cd persona-probe
-py -3.12 -m venv .venv
-.venv\Scripts\python -m pip install -r requirements.txt
+python -m venv .venv
+# Linux/macOS:  source .venv/bin/activate
+# Windows:      .venv\Scripts\activate
+pip install -e .
 ```
 
-You need a running Ollama with two models from different families pulled, e.g.:
+<details>
+<summary>Windows PowerShell, without activating the venv</summary>
 
 ```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\python -m pip install -e .
+```
+
+Then prefix the commands below with `.venv\Scripts\python -m persona_probe` and
+use backtick line-continuations instead of `\`.
+</details>
+
+Pull two models from **different families** — one answers, the other grades:
+
+```bash
 ollama pull qwen2.5:7b      # responder
 ollama pull llama3.1:8b     # judge (different family on purpose)
 ```
 
 ## Run
 
-```powershell
-# probe every persona on the site against the default model pair
-.venv\Scripts\python -m persona_probe `
-    --personas ..\nrohozen.github.io\_personas `
-    --probes .\probes `
-    --responder qwen2.5:7b `
-    --judge llama3.1:8b
+The repo ships with sample personas in `personas/` and matching probes in
+`probes/`, so a fresh clone runs with no arguments:
+
+```bash
+# probe every bundled persona against the default model pair
+persona-probe
 
 # one persona, verbose (prints each turn and the judge's reasoning)
-.venv\Scripts\python -m persona_probe --only rubber-duck -v
+persona-probe --only rubber-duck -v
 
 # write a Markdown report you can commit as a behavioral snapshot
-.venv\Scripts\python -m persona_probe -o report.md
+persona-probe -o report.md
+
+# point it at your own personas and models
+persona-probe --personas path/to/_personas --responder mistral:7b --judge gemma2:9b
 ```
+
+(No console script? The equivalent is `python -m persona_probe`.)
 
 Exit code is non-zero if any probe comes back `BROKEN`, so you can wire it into
 CI or a pre-commit hook and treat a persona regression like a failing build.
@@ -117,6 +139,7 @@ persona_probe/
   judge.py      grade one reply against one rule with the OTHER model
   report.py     console + Markdown rendering
   cli.py        wiring
+personas/       sample persona *.md files (bring your own to test real ones)
 probes/         one YAML per persona
 tests/          deterministic tests for the parts that don't need a model
 ```
@@ -130,3 +153,7 @@ persona should do) lives in editable YAML; judgment (did it?) is spent at the
 boundary on a small local model; and no single model is trusted to both perform
 and grade. That's the same shape as everything else in this stack — just aimed
 at the prompts instead of the code.
+
+## License
+
+[MIT](LICENSE). Use it, fork it, point it at your own personas.

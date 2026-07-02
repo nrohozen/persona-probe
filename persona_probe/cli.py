@@ -31,8 +31,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--personas",
         type=Path,
-        default=Path("../nrohozen.github.io/_personas"),
-        help="directory of persona *.md files",
+        default=Path("./personas"),
+        help="directory of persona *.md files (defaults to the bundled samples)",
     )
     p.add_argument(
         "--probes",
