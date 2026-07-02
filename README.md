@@ -26,10 +26,10 @@ test — which is the whole point of
 If you have `qwen` answer as the persona and then ask `qwen` whether it followed
 the rules, you've let the model grade its own homework — and correlated mistakes
 sail straight through. So the responder and the judge are pinned to different
-families (config: `responder` vs `judge`). It's the
-[Tilda council principle](https://github.com/nrohozen) — independent judges whose
-errors don't correlate — shrunk down to a two-model panel. It is also the exact
-caveat from [Evals That Mean Something](https://nrohozen.github.io/notes/evals-that-mean-something/):
+families (config: `responder` vs `judge`). The principle is a panel of
+independent judges whose errors don't correlate, shrunk down to a two-model
+panel — the same caveat spelled out in
+[Evals That Mean Something](https://nrohozen.github.io/notes/evals-that-mean-something/):
 an LLM judge is fine, right up until it's grading itself.
 
 The verdict is deliberately blunt: each probe returns **HELD**, **BROKEN**, or
@@ -52,30 +52,62 @@ rounding error — a judge that isn't sure should say so rather than flip a coin
 
 ## Install
 
-You need Python 3.10+ and a running [Ollama](https://ollama.com).
+You need Python 3.10+ and a running [Ollama](https://ollama.com) (or any
+OpenAI-compatible server — see [Backends](#backends)).
+
+### Linux
 
 ```bash
+# 1. Install Ollama, then make sure the server is running
+curl -fsSL https://ollama.com/install.sh | sh
+# The installer usually registers a systemd service. If it didn't, run
+# `ollama serve` in another terminal (or: systemctl --user start ollama).
+
+# 2. Clone and install persona-probe into a virtualenv
 git clone https://github.com/nrohozen/persona-probe
 cd persona-probe
-python -m venv .venv
-# Linux/macOS:  source .venv/bin/activate
-# Windows:      .venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -e .
 ```
 
-<details>
-<summary>Windows PowerShell, without activating the venv</summary>
+If `python3` is older than 3.10, install a newer interpreter (e.g.
+`python3.12` on Debian/Ubuntu, `python3.12` from your distro's repo or
+`pyenv`) and use it in place of `python3` above.
 
-```powershell
-py -3.12 -m venv .venv
-.venv\Scripts\python -m pip install -e .
+### macOS
+
+```bash
+brew install ollama          # or download the app from ollama.com
+ollama serve &               # skip if you launched the menubar app
+
+git clone https://github.com/nrohozen/persona-probe
+cd persona-probe
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
 ```
 
-Then prefix the commands below with `.venv\Scripts\python -m persona_probe` and
-use backtick line-continuations instead of `\`.
-</details>
+### Windows (PowerShell)
 
-Pull two models from **different families** — one answers, the other grades:
+Install Ollama from [ollama.com/download](https://ollama.com/download), then:
+
+```powershell
+git clone https://github.com/nrohozen/persona-probe
+cd persona-probe
+py -3.12 -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -e .
+```
+
+Prefer not to activate the venv? Prefix the commands below with
+`.venv\Scripts\python -m persona_probe` and use backtick line-continuations
+instead of `\`.
+
+### Pull two models
+
+Both platforms then need two models from **different families** — one answers,
+the other grades:
 
 ```bash
 ollama pull qwen2.5:7b      # responder
