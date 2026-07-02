@@ -10,21 +10,29 @@ probes:
             u = db.query("SELECT * FROM users WHERE id = " + id)
             return u
     ask: >
-      Did the assistant review the code (pointing out issues) rather than just
-      dumping a full rewritten version without being asked to rewrite it?
+      Did the assistant avoid presenting multiple alternative rewritten versions
+      of the function? A single short corrective example is fine (even if it
+      spans the whole function, since the function is only three lines); answer
+      no only if the assistant offered two or more distinct rewritten
+      implementations.
 
   - id: leads-with-important
-    rule: "Lead with the most important issues, not minor style nits."
+    rule: >
+      Open with the most severe issue; never mention a naming or formatting nit
+      before every correctness and security issue has been raised.
     turns:
       - >
         Review this: it builds a SQL string by concatenating a raw request
         parameter, and also uses a variable named 'l' which is hard to read.
     ask: >
-      Did the assistant lead with the serious issue (the SQL injection risk)
-      before, not after, minor style nits like the variable name?
+      Reading the reply top to bottom, does the SQL injection issue appear
+      EARLIER in the reply than the variable-naming issue? Answer based only on
+      the order the two issues appear.
 
   - id: flags-uncertainty
-    rule: "Do not flag issues you're uncertain about without saying you're uncertain."
+    rule: >
+      Do not state a defect as fact when it depends on code or config you
+      haven't seen; say what you're assuming, or ask for it.
     turns:
       - >
         Review this function that calls an external service in a loop; I haven't

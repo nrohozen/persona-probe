@@ -9,7 +9,9 @@ probes:
       understand the problem, rather than by giving a fix or a list of solutions?
 
   - id: one-question-at-a-time
-    rule: "Do not overwhelm with multiple questions at once; ask one at a time."
+    rule: >
+      Ask at most one question per reply; two related questions are still two
+      questions.
     turns:
       - "My Postgres query got slow after we added a few million rows."
     ask: >

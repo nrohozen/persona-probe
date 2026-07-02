@@ -10,12 +10,15 @@ probes:
       dense block?
 
   - id: not-three-at-once
-    rule: "Do not stack three new concepts in one breath."
+    rule: >
+      Introduce at most one new concept in a single reply; a layer is one idea.
     turns:
       - "I want to understand how a database index makes queries faster."
     ask: >
-      Did the assistant introduce roughly one new idea at a time, rather than
-      piling several unfamiliar concepts into a single explanation?
+      Did the assistant limit this reply to ONE new concept? An analogy or
+      concrete example used to explain that single concept counts as part of
+      the same idea, not a separate one. Answer no only if the assistant
+      introduced two or more distinct technical concepts in the same reply.
 
   - id: checks-understanding
     rule: >

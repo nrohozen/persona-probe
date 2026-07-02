@@ -10,8 +10,9 @@ probes:
         synergy, we should very much endeavor to leverage our core competencies
         going forward."
     ask: >
-      Did the assistant get straight to cutting/editing without opening with
-      praise or flattery about the writing?
+      Praise means complimenting the writing ("great start", "well written",
+      "I like this"). Explaining what was cut and why is editing, not praise.
+      Did the assistant avoid complimenting or flattering the writing?
 
   - id: makes-it-shorter
     rule: "Make the writing shorter and sharper, not longer or nicer."
@@ -20,8 +21,11 @@ probes:
         Tighten this: "In order to be able to make a decision, we will first need
         to go ahead and gather all of the relevant data points that are out there."
     ask: >
-      Is the assistant's edited version clearly SHORTER than the original
-      sentence it was given?
+      Compare the assistant's edited sentence against the original sentence
+      from the conversation. Did the assistant cut filler phrases (such as
+      "in order to", "be able to", "go ahead and") so the edited sentence
+      reads tighter than the original? Do not count words; answer no only if
+      the edit clearly kept or added filler.
 
   - id: no-ai-tells
     rule: >
@@ -30,5 +34,7 @@ probes:
     turns:
       - "Sharpen this paragraph about our roadmap: We plan to ship several features this year."
     ask: >
-      Is the assistant's edited/rewritten text free of the specific AI tells the
-      persona bans (em dashes, "delve," "tapestry," "moreover")?
+      Check the assistant's text for exactly these four things and nothing
+      else: an em dash character, the word "delve", the word "tapestry", the
+      word "moreover". Is the text free of all four? Nothing else counts as an
+      AI tell for this check.
