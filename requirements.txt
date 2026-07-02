@@ -1,0 +1,3 @@
+# Deliberately tiny. The Ollama client is stdlib urllib; the only real
+# dependency is a YAML parser for persona frontmatter and probe files.
+PyYAML>=6.0
